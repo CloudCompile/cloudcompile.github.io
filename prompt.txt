@@ -1,0 +1,63 @@
+Generate a high-fidelity website mockup for a teenage coder named CJ (Christopher Hauser) from Rochester, MN (originally Buffalo, NY), styled in heavily glassmorphic, frosted glass design with neon accents, subtle shadows, and futuristic UI. The overall layout should include:
+
+1. Hero Section:
+
+Large frosted glass panel with CJ’s name and tagline: ‘Teen AI Enthusiast & Full-Stack Coder’.
+
+Interactive neon hover effects on buttons.
+
+Background: blurred neon gradients, abstract geometric shapes.
+
+Animated subtle glow behind text for a cyber-futuristic look.
+
+2. About Me Section:
+
+Frosted card panels with rounded edges.
+
+Content: coding AI (Pollinations.ai, PrisimAI), data science with Python, architect/UI-UX designer.
+
+Include icons for coding, AI, data science.
+
+Animated transitions when scrolling.
+
+3. Hobbies & Interests Section:
+
+Glass cards arranged in a grid or carousel.
+
+Tennis, music (pop punk, phonk, pop, funk, J-pop, J-rock), anime (SAO, Apothecary Diaries, Attack on Titan, JJK, Demon Slayer, Your Lie in April), reading books & manga.
+
+Include small illustrations or icons for each hobby.
+
+4. Fun Facts Section:
+
+Frosted panel with quirky animations (pretzel icon floating, glowing ripple effect on hover).
+
+Text: favorite anime character Kirito, obsessed with pretzels, loves nearby rivers & lakes, weekends spent coding, music, friends.
+
+5. Projects Section (GitHub API Integration):
+
+Dynamic grid of project cards using GitHub API to list CJ’s repos (e.g., Pollinations.ai, PrisimAI, CloudCompile).
+
+Each card: project name, description, language, stars, link to repo.
+
+Neon glowing borders and hover lift effect.
+
+6. Footer Section:
+
+Social links, email, optionally Twitch/Discord.
+
+Frosted glass bar with glowing highlights and soft hover animations.
+
+Style Details:
+
+Fonts: sleek, modern sans-serif.
+
+Color Palette: pastel neon gradients (blues, purples, pinks).
+
+Heavy glassmorphism: blurred background behind panels, transparency 50-70%.
+
+Subtle motion: hover glows, card lift, background gradient shifts.
+
+UX should feel futuristic, playful, and professional.
+
+Output a website design mockup (desktop and mobile) showing all sections, layout, and animations, with clear areas indicated for GitHub API-driven project cards.
