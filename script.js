@@ -31,14 +31,21 @@ const languageColors = {
 // Fetch and display GitHub projects
 async function fetchGitHubProjects() {
     try {
-        const response = await fetch(`${GITHUB_API_URL}?sort=updated&per_page=6`);
-        
-        if (!response.ok) {
-            throw new Error('Failed to fetch repositories');
-        }
-        
+        const response = await fetch(GITHUB_API_URL + '?per_page=100');
+        if (!response.ok) throw new Error('Failed to fetch repositories');
         const repos = await response.json();
-        displayProjects(repos);
+
+        // Filter out forks and sort by activity (stars + forks)
+        const activeRepos = repos
+            .filter(repo => !repo.fork)
+            .sort((a, b) => (b.stargazers_count + b.forks_count) - (a.stargazers_count + a.forks_count))
+            .slice(0, 6);
+
+        if (activeRepos.length === 0) {
+            displayFallbackProjects();
+        } else {
+            displayProjects(activeRepos);
+        }
     } catch (error) {
         console.error('Error fetching GitHub projects:', error);
         displayFallbackProjects();
@@ -48,26 +55,11 @@ async function fetchGitHubProjects() {
 // Display projects in the grid
 function displayProjects(repos) {
     projectsGrid.innerHTML = '';
-    
-    // Filter out forked repos and get the most relevant ones
-    const filteredRepos = repos
-        .filter(repo => !repo.fork)
-        .slice(0, 6);
-    
-    if (filteredRepos.length === 0) {
-        displayFallbackProjects();
-        return;
-    }
-    
-    filteredRepos.forEach((repo, index) => {
+    repos.forEach((repo, index) => {
         const projectCard = createProjectCard(repo);
         projectCard.style.animationDelay = `${index * 0.1}s`;
         projectsGrid.appendChild(projectCard);
-        
-        // Trigger animation
-        setTimeout(() => {
-            projectCard.classList.add('visible');
-        }, index * 100);
+        setTimeout(() => projectCard.classList.add('visible'), index * 100);
     });
 }
 
@@ -75,9 +67,8 @@ function displayProjects(repos) {
 function createProjectCard(repo) {
     const card = document.createElement('div');
     card.className = 'glass-card project-card';
-    
     const languageColor = languageColors[repo.language] || languageColors['default'];
-    
+
     card.innerHTML = `
         <h3 class="project-name">${repo.name}</h3>
         <p class="project-description">${repo.description || 'No description available'}</p>
@@ -88,52 +79,29 @@ function createProjectCard(repo) {
                     ${repo.language}
                 </span>
             ` : ''}
-            <span class="project-stars">
-                ⭐ ${repo.stargazers_count}
-            </span>
+            <span class="project-stars">⭐ ${repo.stargazers_count}</span>
         </div>
         <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="project-link">
             View on GitHub →
         </a>
     `;
-    
     return card;
 }
 
 // Fallback projects if GitHub API fails
 function displayFallbackProjects() {
     const fallbackProjects = [
-        {
-            name: 'Pollinations.ai',
-            description: 'AI-powered creative tools and image generation platform',
-            language: 'JavaScript',
-            stars: 0,
-            url: 'https://github.com/CloudCompile'
-        },
-        {
-            name: 'PrismAI',
-            description: 'Advanced AI assistant and automation platform',
-            language: 'Python',
-            stars: 0,
-            url: 'https://github.com/CloudCompile'
-        },
-        {
-            name: 'CloudCompile',
-            description: 'Cloud-based compilation and development tools',
-            language: 'TypeScript',
-            stars: 0,
-            url: 'https://github.com/CloudCompile'
-        }
+        { name: 'Pollinations.ai', description: 'AI-powered creative tools and image generation platform', language: 'JavaScript', stars: 0, url: 'https://github.com/CloudCompile' },
+        { name: 'PrismAI', description: 'Advanced AI assistant and automation platform', language: 'Python', stars: 0, url: 'https://github.com/CloudCompile' },
+        { name: 'CloudCompile', description: 'Cloud-based compilation and development tools', language: 'TypeScript', stars: 0, url: 'https://github.com/CloudCompile' }
     ];
-    
+
     projectsGrid.innerHTML = '';
-    
     fallbackProjects.forEach((project, index) => {
         const card = document.createElement('div');
         card.className = 'glass-card project-card';
-        
         const languageColor = languageColors[project.language] || languageColors['default'];
-        
+
         card.innerHTML = `
             <h3 class="project-name">${project.name}</h3>
             <p class="project-description">${project.description}</p>
@@ -147,12 +115,8 @@ function displayFallbackProjects() {
                 View on GitHub →
             </a>
         `;
-        
         projectsGrid.appendChild(card);
-        
-        setTimeout(() => {
-            card.classList.add('visible');
-        }, index * 100);
+        setTimeout(() => card.classList.add('visible'), index * 100);
     });
 }
 
@@ -170,27 +134,14 @@ function closeMobileMenu() {
 
 // Intersection Observer for scroll animations
 function setupScrollAnimations() {
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-    
+    const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
+            if (entry.isIntersecting) entry.target.classList.add('visible');
         });
     }, observerOptions);
-    
-    // Observe about cards
-    document.querySelectorAll('.about-card').forEach(card => {
-        card.classList.add('animate');
-        observer.observe(card);
-    });
-    
-    // Observe hobby cards
-    document.querySelectorAll('.hobby-card').forEach(card => {
+
+    document.querySelectorAll('.about-card, .hobby-card').forEach(card => {
         card.classList.add('animate');
         observer.observe(card);
     });
@@ -201,14 +152,9 @@ function setupSmoothScroll() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             e.preventDefault();
-            const targetId = this.getAttribute('href');
-            const targetElement = document.querySelector(targetId);
-            
+            const targetElement = document.querySelector(this.getAttribute('href'));
             if (targetElement) {
-                targetElement.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+                targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 closeMobileMenu();
             }
         });
@@ -231,53 +177,29 @@ function throttle(func, limit) {
 function setupParallax() {
     const handleScroll = throttle(() => {
         const scrolled = window.pageYOffset;
-        const shapes = document.querySelectorAll('.shape');
-        
-        shapes.forEach((shape, index) => {
-            const speed = 0.1 * (index + 1);
-            shape.style.transform = `translateY(${scrolled * speed}px)`;
+        document.querySelectorAll('.shape').forEach((shape, index) => {
+            shape.style.transform = `translateY(${scrolled * 0.1 * (index + 1)}px)`;
         });
-    }, 16); // ~60fps
-    
+    }, 16);
     window.addEventListener('scroll', handleScroll);
 }
 
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Fetch GitHub projects
     fetchGitHubProjects();
-    
-    // Setup mobile menu
-    if (mobileMenuBtn) {
-        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
-    }
-    
-    // Setup scroll animations
+    if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', toggleMobileMenu);
     setupScrollAnimations();
-    
-    // Setup smooth scrolling
     setupSmoothScroll();
-    
-    // Setup parallax effect
     setupParallax();
-    
-    // Close mobile menu when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.glass-nav')) {
-            closeMobileMenu();
-        }
-    });
+    document.addEventListener('click', e => { if (!e.target.closest('.glass-nav')) closeMobileMenu(); });
 });
 
 // Add subtle hover glow effect to cards with throttling
-const handleMouseMove = throttle((e) => {
-    const cards = document.querySelectorAll('.glass-card:hover');
-    
-    cards.forEach(card => {
+const handleMouseMove = throttle(e => {
+    document.querySelectorAll('.glass-card:hover').forEach(card => {
         const rect = card.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-        
         card.style.setProperty('--mouse-x', `${x}px`);
         card.style.setProperty('--mouse-y', `${y}px`);
     });
