@@ -111,7 +111,7 @@ function displayFallbackProjects() {
             url: 'https://github.com/CloudCompile'
         },
         {
-            name: 'PrisimAI',
+            name: 'PrismAI',
             description: 'Advanced AI assistant and automation platform',
             language: 'Python',
             stars: 0,
@@ -215,9 +215,21 @@ function setupSmoothScroll() {
     });
 }
 
+// Throttle function for performance optimization
+function throttle(func, limit) {
+    let inThrottle;
+    return function(...args) {
+        if (!inThrottle) {
+            func.apply(this, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+}
+
 // Parallax effect for background shapes
 function setupParallax() {
-    window.addEventListener('scroll', () => {
+    const handleScroll = throttle(() => {
         const scrolled = window.pageYOffset;
         const shapes = document.querySelectorAll('.shape');
         
@@ -225,7 +237,9 @@ function setupParallax() {
             const speed = 0.1 * (index + 1);
             shape.style.transform = `translateY(${scrolled * speed}px)`;
         });
-    });
+    }, 16); // ~60fps
+    
+    window.addEventListener('scroll', handleScroll);
 }
 
 // Initialize everything when DOM is loaded
@@ -255,9 +269,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Add subtle hover glow effect to cards
-document.addEventListener('mousemove', (e) => {
-    const cards = document.querySelectorAll('.glass-card');
+// Add subtle hover glow effect to cards with throttling
+const handleMouseMove = throttle((e) => {
+    const cards = document.querySelectorAll('.glass-card:hover');
     
     cards.forEach(card => {
         const rect = card.getBoundingClientRect();
@@ -267,4 +281,6 @@ document.addEventListener('mousemove', (e) => {
         card.style.setProperty('--mouse-x', `${x}px`);
         card.style.setProperty('--mouse-y', `${y}px`);
     });
-});
+}, 16);
+
+document.addEventListener('mousemove', handleMouseMove);
